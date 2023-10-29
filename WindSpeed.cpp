@@ -17,9 +17,13 @@ uint8_t WindSpeed::GetSpeedBeaufort()
 WindSpeed::WindSpeed(const uint8_t InterruptPin)
 {
     pinMode(InterruptPin, INPUT);
-	usedInterruptPin = InterruptPin;
-	attachInterrupt(digitalPinToInterrupt(InterruptPin), std::bind(&WindSpeed::WindFaneInterrupt, this), FALLING);
+	usedInterruptPin = InterruptPin;	
     previousWeatherInfoCollectMillis = millis();
+    attachInterrupt(digitalPinToInterrupt(InterruptPin), std::bind(&WindSpeed::WindFaneInterrupt, this), FALLING);
+    for (int i = 0; i < WINDSPEED_ARRAY_SIZE; i++)
+    {
+        windspeed_array[i] = 0;
+    }
 }
 
 WindSpeed::~WindSpeed()
@@ -40,43 +44,57 @@ float WindSpeed::WindSpeedToMsFromRPM(const float &RPMwindspeed)
 
 uint8_t WindSpeed::Beaufort(const float &Speed)
 {
+    //Serial.print("Input:");
+    //Serial.println(Speed);
     uint8_t b = pow(pow((Speed / 0.836), 0.33), 2);
+    //Serial.print("Output:");
+    //Serial.println(b);
     return b;
 }
 
 void WindSpeed::shiftWindspeedArray(const unsigned int &newValue)
 {
-    unsigned long totalspeed = 0;
+    //Serial.print(newValue); Serial.print("-->");
 
-    MaxWindSpeedRPM = newValue / 2;
+    unsigned long totalspeed = 0;
+    unsigned int lMaxWindSpeedRPM = newValue / 2;
 
     if (newValue > 0)
     {
         if (newValue < MaxWindSpeedRPM)
         {
-            MaxWindSpeedRPM = (MaxWindSpeedRPM + newValue) / 2;
+            lMaxWindSpeedRPM = (MaxWindSpeedRPM + newValue) / 2;
         }
         else
         {
-            MaxWindSpeedRPM = newValue;
+            lMaxWindSpeedRPM = newValue;
         }
         LastTimeSet = WINDSPEED_REMBER_TIME;
+        MaxWindSpeedRPM = lMaxWindSpeedRPM;
     }
 
-    memcpy(windspeed_array, &windspeed_array[1], sizeof(windspeed_array) - sizeof(unsigned int));
+    /*for (int i = 0; i < WINDSPEED_ARRAY_SIZE; i++)
+    {
+        Serial.print(windspeed_array[i], HEX);
+        Serial.print(',');
+    }
+    Serial.println();*/
+
+    memcpy(windspeed_array, &windspeed_array[1], (WINDSPEED_ARRAY_SIZE - 1) * sizeof(unsigned int));
     windspeed_array[WINDSPEED_ARRAY_SIZE - 1] = MaxWindSpeedRPM;
 
     for (int i = 0; i < WINDSPEED_ARRAY_SIZE; i++)
     {
         totalspeed += windspeed_array[i];
+        //Serial.print(windspeed_array[i], HEX);
+        //Serial.print(',');
     }
+    //Serial.println();
+
     AverageWindspeedRPM = (totalspeed / WINDSPEED_ARRAY_SIZE);
-    #ifdef BUILD_FOR_TEST_ESP32
-        Serial.print("Average:");
-        Serial.print(WindSpeedToMsFromRPM(AverageWindspeedRPM));
-        Serial.print(", BFT:");
-        Serial.println(Beaufort(WindSpeedToMsFromRPM(AverageWindspeedRPM)));
-    #endif
+
+    //Serial.print("Avg:");Serial.print(AverageWindspeedRPM); Serial.print(", Tot:"); Serial.print(totalspeed);    
+    //Serial.print("**** Average:"); Serial.print(WindSpeedToMsFromRPM(AverageWindspeedRPM)); Serial.print(", BFT:"); Serial.println(Beaufort(WindSpeedToMsFromRPM(AverageWindspeedRPM)));
 
     if (LastTimeSet == 0)
     {

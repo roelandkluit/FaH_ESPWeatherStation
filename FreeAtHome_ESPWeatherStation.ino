@@ -101,10 +101,7 @@ void RegenCallback(const bool& isRainOrExpected, const float& amount)
     {
         espWeer->SetRainInformation(amount);
         SetCustomMenu(String(F("Rain Update")));
-        Serial.print("Rain: ");
-        Serial.print(isRainOrExpected);
-        Serial.print(" Amount: ");
-        Serial.println(amount);
+        //Serial.print("Rain: "); Serial.print(isRainOrExpected); Serial.print(" Amount: "); Serial.println(amount);
     }
 }
 
@@ -113,8 +110,7 @@ void WindMSCallback(const float& amount)
     if (espWeer != NULL)
     {
         espWeer->SetWindGustSpeed(amount);
-        Serial.print("Wind MS: ");
-        Serial.println(amount);
+        //Serial.print("Wind MS: "); Serial.println(amount);
         SetCustomMenu(String(F("Wind Update")));
     }
 }
@@ -124,8 +120,7 @@ void LightCallback(const uint16_t& amount)
     if (espWeer != NULL)
     {
         espWeer->SetBrightnessLevelLux(amount);
-        Serial.print("Lux: ");
-        Serial.println(amount);
+        //Serial.print("Lux: "); Serial.println(amount);
         SetCustomMenu(String(F("Lux Update")));
     }
 }
@@ -135,8 +130,7 @@ void WindBeaufortCallback(const uint8_t& amount)
     if (espWeer != NULL)
     {
         espWeer->SetWindSpeedBeaufort(amount);
-        Serial.print("Wind Beaufort: ");
-        Serial.println(amount);
+        //Serial.print("Wind Beaufort: "); Serial.println(amount);
         SetCustomMenu(String(F("Wind Update")));
     }
 }
@@ -146,15 +140,14 @@ void TemperatureCallback(const float& amount)
     if (espWeer != NULL)
     {
         espWeer->SetTemperatureLevel(amount);
-        Serial.print("Temperature: ");
-        Serial.println(amount);
+        //Serial.print("Temperature: "); Serial.println(amount);
         SetCustomMenu(String(F("Temp Update")));
     }
 }
 
 void setup()
 {
-    Serial.begin(115200);
+    //Serial.begin(115200);
     delay(500);
 
     deviceID = String(F("ESPWeatherStation_")) + String(WIFI_getChipId(), HEX);
@@ -228,7 +221,7 @@ void SetCustomMenu(String StatusText)
         State = GetWeerStatus();
     }
 
-    menuHtml = String(F("{1}<br/>{2}<hr/><br/><meta http-equiv='refresh' content='10'>\n"));
+    menuHtml = String(F("{1}<br/>{2}<br/><meta http-equiv='refresh' content='10'>\n"));
     menuHtml.replace(T_1, State);
     menuHtml.replace(T_2, StatusText);
 
@@ -284,7 +277,7 @@ void loop()
 
                 //Serial.println(F("Create Switch Device"));
                 String deviceName = String(F("ESP32 Weer ")) + String(WIFI_getChipId(), HEX);
-                espWeer = freeAtHomeESPapi.CreateWeatherStation("TestWeer", deviceName.c_str(), 300);
+                espWeer = freeAtHomeESPapi.CreateWeatherStation("WeatherStation", deviceName.c_str(), 300);
                 if (espWeer != NULL)
                 {                    
                     String FahID = freeAtHomeESPapi.U64toString(espWeer->GetFahDeviceID());
@@ -304,16 +297,16 @@ void loop()
                 case 0:
                     oBuienradar->SetNightMode(freeAtHomeESPapi.isNightForSysAp());
                     break;
-                case 1:
+                case 20:
                     oBuienradar->Process();
                     break;
-                case 2:
+                case 40:
                     oWindspeed->Process();
                     break;
-                case 3:
+                case 60:
                     oTemperature->Process();
                     break;
-                case 4:
+                case 80:
                     oBrightness->Process();
                     break;
                 default:

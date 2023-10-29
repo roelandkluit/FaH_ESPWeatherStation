@@ -62,13 +62,13 @@ public:
             {
                 const char* loaded_data = reinterpret_cast<const char*>(EEPROM.getDataPtr() + current_size);
                 parameters_.emplace_back(entries[i].id, entries[i].label, loaded_data, entries[i].max_len, entries[i].customHtml);
-                Serial.println(String("Loading: ") + entries[i].id + ": " + loaded_data);
+                //Serial.println(String("Loading: ") + entries[i].id + ": " + loaded_data);
             }
             else
             {
                 EEPROM.write(current_size, 0);
                 parameters_.emplace_back(entries[i].id, entries[i].label, "", entries[i].max_len, entries[i].customHtml);
-                Serial.println(String("Creating: ") + entries[i].id);
+                //Serial.println(String("Creating: ") + entries[i].id);
             }
             current_size += entries[i].max_len;
             wm_.addParameter(&parameters_.back());
@@ -109,7 +109,7 @@ private:
             if (strncmp(reinterpret_cast<const char*>(EEPROM.getDataPtr() + current_size), param.getValue(), param.getValueLength()) != 0)
             {
                 strncpy(reinterpret_cast<char*>(EEPROM.getDataPtr() + current_size), param.getValue(), param.getValueLength());
-                Serial.println(String("Updating: ") + param.getID());
+                //Serial.println(String("Updating: ") + param.getID());
             }
             current_size += param.getValueLength();
         }

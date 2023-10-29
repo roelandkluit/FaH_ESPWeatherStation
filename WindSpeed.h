@@ -13,7 +13,7 @@
 
 #define WIND_REFRESH_INTERVAL 10000 // Once every 10 seconds
 #define WINDSPEED_ARRAY_SIZE 60 //Baufort is calculated over 10 minutes, with a refresh every 10 seconds, the array needs to store 60 items
-#define WINDSPEED_REMBER_TIME 6 //One minute
+#define WINDSPEED_REMBER_TIME 2 //20 seconds
 #define WINDSPEED_SKIP_NOTIFICATIONS 2 //Only report every 30 seconds (0-2 * WIND_REFRESH_INTERVAL)
 
 //float pi = 3.14159265;
@@ -26,7 +26,7 @@ class WindSpeed
 private:
 	void WindFaneInterrupt();
 	uint8_t usedInterruptPin = 0;
-	volatile unsigned int WindFaneCount;
+	volatile unsigned int WindFaneCount = 0;
 	unsigned int windspeed_array[WINDSPEED_ARRAY_SIZE] = {0};
 	unsigned int AverageWindspeedRPM = 0;
 	unsigned int MaxWindSpeedRPM = 0;

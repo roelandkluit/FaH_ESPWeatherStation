@@ -9,7 +9,7 @@
 	#include "WProgram.h"
 #endif
 
-#define BIGHTNESS_REFRESH_INTERVAL 60002 // Once every 60 seconds
+#define BIGHTNESS_REFRESH_INTERVAL 30002 // Once every 30 seconds
 
 class BrightnessSensor {
 public:
@@ -23,7 +23,6 @@ private:
 	unsigned long previousWeatherInfoCollectMillis = 0;
 	uint8_t PIN_Sensor;
 	uint16_t BrightnessLightLevel = 0xFFFF;
-
 };
 
 #endif

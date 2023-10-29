@@ -27,7 +27,7 @@ BrightnessSensor::BrightnessSensor(const uint8_t& pin)
 {
     pinMode(pin, INPUT);	
 	this->PIN_Sensor = pin;
-    previousWeatherInfoCollectMillis = millis() - (BIGHTNESS_REFRESH_INTERVAL / 2);
+    previousWeatherInfoCollectMillis = millis();
 }
 
 uint16_t BrightnessSensor::GetBrightness()
