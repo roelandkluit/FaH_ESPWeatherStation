@@ -23,6 +23,7 @@ private:
 	unsigned long previousWeatherInfoCollectMillis = 0;
 	uint8_t PIN_Sensor;
 	uint16_t BrightnessLightLevel = 0xFFFF;
+	uint8_t forceUpdateCounter = 0;
 };
 
 #endif

@@ -16,6 +16,7 @@
 
 #ifdef ESP32
 uint8_t WiFiManager::_lastconxresulttmp = WL_IDLE_STATUS;
+#define WM_NOTEMP
 #endif
 
 /**

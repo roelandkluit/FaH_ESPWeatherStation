@@ -11,14 +11,19 @@ void BrightnessSensor::Process()
         previousWeatherInfoCollectMillis = millis();
         uint16_t tBrightnessLightLevel = analogRead(PIN_Sensor);
 
-        if (tBrightnessLightLevel != this->BrightnessLightLevel)
+        if (forceUpdateCounter >= 10 || tBrightnessLightLevel != this->BrightnessLightLevel)
         {
             this->BrightnessLightLevel = tBrightnessLightLevel;
             if (__CB_BRIGHTNESS_CHANGED != NULL)
             {
                 uint16_t B2 = tBrightnessLightLevel + pow((tBrightnessLightLevel / 15), 2);
                 __CB_BRIGHTNESS_CHANGED(B2);
+                forceUpdateCounter = 0;
             }
+        }
+        else
+        {
+            forceUpdateCounter++;
         }
     }
 }

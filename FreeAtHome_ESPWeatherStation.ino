@@ -119,7 +119,7 @@ void LightCallback(const uint16_t& amount)
 {
     if (espWeer != NULL)
     {
-        espWeer->SetBrightnessLevelLux(amount);
+        espWeer->SetBrightnessLevelLux(amount, true);
         //Serial.print("Lux: "); Serial.println(amount);
         SetCustomMenu(String(F("Lux Update")));
     }
@@ -148,6 +148,7 @@ void TemperatureCallback(const float& amount)
 void setup()
 {
     //Serial.begin(115200);
+    setCpuFrequencyMhz(80);
     delay(500);
 
     deviceID = String(F("ESPWeatherStation_")) + String(WIFI_getChipId(), HEX);
