@@ -57,6 +57,7 @@ void WindSpeed::shiftWindspeedArray(const unsigned int &newValue)
     //Serial.print(newValue); Serial.print("-->");
 
     unsigned long totalspeed = 0;
+    unsigned long windSpeedAvgLast3 = 0;
     unsigned int lMaxWindSpeedRPM = newValue / 2;
 
     if (newValue > 0)
@@ -72,6 +73,10 @@ void WindSpeed::shiftWindspeedArray(const unsigned int &newValue)
         LastTimeSet = WINDSPEED_REMBER_TIME;
         MaxWindSpeedRPM = lMaxWindSpeedRPM;
     }
+    else
+    {
+        lMaxWindSpeedRPM = MaxWindSpeedRPM;
+    }
 
     /*for (int i = 0; i < WINDSPEED_ARRAY_SIZE; i++)
     {
@@ -81,7 +86,7 @@ void WindSpeed::shiftWindspeedArray(const unsigned int &newValue)
     Serial.println();*/
 
     memcpy(windspeed_array, &windspeed_array[1], (WINDSPEED_ARRAY_SIZE - 1) * sizeof(unsigned int));
-    windspeed_array[WINDSPEED_ARRAY_SIZE - 1] = MaxWindSpeedRPM;
+    windspeed_array[WINDSPEED_ARRAY_SIZE - 1] = lMaxWindSpeedRPM;
 
     for (int i = 0; i < WINDSPEED_ARRAY_SIZE; i++)
     {
@@ -89,8 +94,17 @@ void WindSpeed::shiftWindspeedArray(const unsigned int &newValue)
         //Serial.print(windspeed_array[i], HEX);
         //Serial.print(',');
     }
+
+    for (int i = WINDSPEED_ARRAY_SIZE - 3; i < WINDSPEED_ARRAY_SIZE; i++)
+    {
+        windSpeedAvgLast3 += windspeed_array[i];
+        //Serial.print(windspeed_array[i], HEX);
+        //Serial.print(',');
+    }
+
     //Serial.println();
 
+    MaxWindSpeedAvgRPM = (windSpeedAvgLast3 / 3);
     AverageWindspeedRPM = (totalspeed / WINDSPEED_ARRAY_SIZE);
 
     //Serial.print("Avg:");Serial.print(AverageWindspeedRPM); Serial.print(", Tot:"); Serial.print(totalspeed);    
@@ -129,8 +143,7 @@ void WindSpeed::SetWindspeeds(const float& maxWindGustMS, const uint8_t& windSpe
 void WindSpeed::Process()
 {
     if (millis() - previousWeatherInfoCollectMillis >= (WIND_REFRESH_INTERVAL))
-    {
-        unsigned int currentWindFaneReading = 0;
+    {        
         noInterrupts();
         currentWindFaneReading = WindFaneCount;
         WindFaneCount = 0;

@@ -20,6 +20,7 @@ Generic ESP32_WROVER Module
 * *********************** *********************** *********************** *********************** **********************
 */
 
+
 #ifdef ESP32
 #include <dummy.h>
 #include <WiFi.h>
@@ -30,6 +31,7 @@ Generic ESP32_WROVER Module
 
 #define RELAY_CONTACT_GPIO12 12
 
+#include <BuildConfig.h>
 #include <FreeAtHomeESPapi.h>
 #include <FahESPDevice.h>
 #include <FahESPWeatherStation.h>
@@ -55,7 +57,7 @@ String menuHtml;
 
 WiFiManager wm;
 WifiManagerParamHelper wm_helper(wm);
-uint16_t registrationDelay = 2000;
+uint16_t registrationDelay = 5000;
 uint16_t regCount = 0;
 uint16_t regCountFail = 0;
 uint8_t handler = 0;
@@ -119,7 +121,7 @@ void LightCallback(const uint16_t& amount)
 {
     if (espWeer != NULL)
     {
-        espWeer->SetBrightnessLevelLux(amount, true);
+        espWeer->SetBrightnessLevelLux(amount);
         //Serial.print("Lux: "); Serial.println(amount);
         SetCustomMenu(String(F("Lux Update")));
     }
@@ -145,11 +147,63 @@ void TemperatureCallback(const float& amount)
     }
 }
 
+void SendLegacyRest()
+{
+    if (oWindspeed == NULL || oTemperature == NULL || oBrightness == NULL)
+    {
+        wm.server->send(503, String(F("text/plain")), String(F("Not Ready")));
+    }
+    else
+    {
+        char temp[200];
+        float wsms = oWindspeed->GetWindGusts();
+        unsigned int awsms = oWindspeed->GetSpeedBeaufort();
+        unsigned long long uptime = esp_timer_get_time() / 1000 / 1000;
+        unsigned long SunLightLevel = oBrightness->GetBrightness();
+        float temperatureCoutside = oTemperature->GetTemperature();
+        snprintf(temp, 200, String(F("{\"weather\":{\"windmax\":\"%2.1f\",\"windavg\":\"%u\",\"sun\":\"%u\",\"temperature\":\"%4.1f\",\"uptm\":\"%llu\"}}")).c_str(), wsms, awsms, SunLightLevel, temperatureCoutside, uptime);
+        wm.server->send(200, String(F("application/json")), temp);
+    }
+}
+
+void handleDevice()
+{
+    /*
+    String Date = GetDateTime(boot_unixtimestamp);
+    #ifdef ESP32
+        String Text = "Timestamp: " + Date + " > " + String(boot_unixtimestamp) + "\r\nHeap: " + String(ESP.getFreeHeap()) + "\r\nMaxHeap: " + String(ESP.getMaxAllocHeap()) + "\r\n";
+    #else //ESP8266
+        String Text = "Timestamp: " + Date + " > " + String(boot_unixtimestamp) + "\r\nHeap: " + String(ESP.getFreeHeap()) + "\r\nMaxHeap: " + String(ESP.getMaxFreeBlockSize()) + "\r\nFragemented:" + String(ESP.getHeapFragmentation()) + "\r\n";
+    #endif // ESP32
+    */
+#ifdef ESP32
+    String Text = "Heap: " + String(ESP.getFreeHeap()) + "\r\nMaxHeap: " + String(ESP.getMaxAllocHeap()) + String(F("\r\nFAHESP:")) + freeAtHomeESPapi.Version() + String(F("\r\nConnectCount:")) + String(regCount) + String(F("\r\nConnectFail:")) + String(regCountFail);
+#else //ESP8266
+    String Text = String(F("Heap: ")) + String(ESP.getFreeHeap()) + String(F("\r\nMaxHeap: ")) + String(ESP.getMaxFreeBlockSize()) + String(F("\r\nFragemented:")) + String(ESP.getHeapFragmentation()) + String(F("\r\nFAHESP:")) + freeAtHomeESPapi.Version() + String(F("\r\nConnectCount:")) + String(regCount) + String(F("\r\nConnectFail:")) + String(regCountFail);
+#endif // ESP32
+
+#ifndef MINIMAL_UPLOAD
+    if (espWeer != NULL)
+    {
+        Text += String(F("\r\nWind RPM Count: ")) + String(oWindspeed->currentWindFaneReading);
+        Text += String(F("\r\nPD: ")) + String(espWeer->GetPendingDatapointCount());
+        Text += String(F("\r\nMSC: ")) + String(espWeer->GetMScounter());
+    }
+#endif
+
+    wm.server->send(200, String(F("text/plain")), Text.c_str());
+}
+
+
 void setup()
 {
-    //Serial.begin(115200);
     setCpuFrequencyMhz(80);
+
+    #ifdef DEBUG
+        Serial.begin(115200);
+    #endif
     delay(500);
+    DEBUG_PL("Starting in debug mode");
 
     deviceID = String(F("ESPWeatherStation_")) + String(WIFI_getChipId(), HEX);
     WiFi.mode(WIFI_AP_STA); // explicitly set mode, esp defaults to STA+AP
@@ -164,17 +218,18 @@ void setup()
 
     if (!res)
     {
-        //Serial.println(F("Failed to connect"));
+        DEBUG_PL(String(F("Failed to connect")));
         ESP.restart();
     }
     else 
     {
         //if you get here you have connected to the WiFi
-        //Serial.println(F("connected"));
+        DEBUG_PL(F("connected"));
         WiFi.mode(WIFI_STA);
         wm.startWebPortal();
         wm.setShowInfoUpdate(true);
         SetCustomMenu(String(F("Initializing")));
+        wm.server->on("/fah", handleDevice);
         std::vector<const char*> _menuIdsUpdate = {"custom", "sep", "wifi","param","info","update" };
         wm.setMenu(_menuIdsUpdate);
     }
@@ -200,6 +255,8 @@ void setup()
 
     oBuienradar = new Buienradar(lon, lat);
     oBuienradar->SetOnRainReportEvent(RegenCallback);
+
+    wm.server->on("/rest", SendLegacyRest);
 }
 
 String GetWeerStatus()
@@ -225,6 +282,8 @@ void SetCustomMenu(String StatusText)
     menuHtml = String(F("{1}<br/>{2}<br/><meta http-equiv='refresh' content='10'>\n"));
     menuHtml.replace(T_1, State);
     menuHtml.replace(T_2, StatusText);
+
+    DEBUG_PL(StatusText);
 
     wm.setCustomMenuHTML(menuHtml.c_str());
 }
@@ -276,9 +335,13 @@ void loop()
                 wm.setCustomMenuHTML(NULL);
                 menuHtml = "";
 
-                //Serial.println(F("Create Switch Device"));
+                DEBUG_PL(F("Create WeatherStation Device"));
                 String deviceName = String(F("ESP32 Weer ")) + String(WIFI_getChipId(), HEX);
-                espWeer = freeAtHomeESPapi.CreateWeatherStation("WeatherStation", deviceName.c_str(), 300);
+                #ifdef DEBUG
+                espWeer = freeAtHomeESPapi.CreateWeatherStation("TestWeer", deviceName.c_str(), 300);                
+                #else
+                    espWeer = freeAtHomeESPapi.CreateWeatherStation("WeatherStation", deviceName.c_str(), 300);
+                #endif          
                 if (espWeer != NULL)
                 {                    
                     String FahID = freeAtHomeESPapi.U64toString(espWeer->GetFahDeviceID());
@@ -287,7 +350,7 @@ void loop()
                 else
                 {
                     SetCustomMenu(String(F("Device Registration Error")));
-                    //Serial.println(F("Failed to create Virtual device, check user authorizations"));
+                    DEBUG_PL(F("Failed to create Virtual device, check user authorizations"));
                     registrationDelay = 30000;
                 }
             }

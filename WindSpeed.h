@@ -17,9 +17,9 @@
 #define WINDSPEED_SKIP_NOTIFICATIONS 2 //Only report every 30 seconds (0-2 * WIND_REFRESH_INTERVAL)
 
 //float pi = 3.14159265;
-//float radius = 0.07;
+//float radius = 0.7;
 //float RPM_FACTOR = ((2 * pi * radius) / 60) * RPMwindspeed;  // Calculate wind speed on m/s
-#define RPM_FACTOR 0.00733038285837618422307950122765
+#define RPM_FACTOR 0.0733038285837618422307950122765
 
 class WindSpeed
 {
@@ -30,6 +30,7 @@ private:
 	unsigned int windspeed_array[WINDSPEED_ARRAY_SIZE] = {0};
 	unsigned int AverageWindspeedRPM = 0;
 	unsigned int MaxWindSpeedRPM = 0;
+	unsigned int MaxWindSpeedAvgRPM = 0;
 	float MaxWindGustMS = -1;
 	uint8_t SpeedBeaufort = 255;
 	uint8_t LastTimeSet = 0;
@@ -44,6 +45,7 @@ private:
 public:
 	void SetOnWindGustsChangeEvent(void(*callback)(const float& maxWindGust)) { __CB_WINDGUST_CHANGED = callback; }
 	void SetOnWindBeaufortChangeEvent(void(*callback)(const uint8_t& BeaufortSpeed)) { __CB_WINDBEAUFORT_CHANGED = callback; }
+	unsigned int currentWindFaneReading = 0;
 	float GetWindGusts();
 	uint8_t GetSpeedBeaufort();
 	WindSpeed(const uint8_t InterruptPin);	
