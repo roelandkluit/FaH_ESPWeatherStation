@@ -20,6 +20,7 @@ Generic ESP32_WROVER Module
 * *********************** *********************** *********************** *********************** **********************
 */
 
+#include <BuildConfig.h>
 
 #ifdef ESP32
 #include <dummy.h>
@@ -28,8 +29,6 @@ Generic ESP32_WROVER Module
 #else
 #error "Platform not supported"
 #endif
-
-#define RELAY_CONTACT_GPIO12 12
 
 #include <BuildConfig.h>
 #include <FreeAtHomeESPapi.h>
@@ -211,9 +210,6 @@ void setup()
     wm_helper.Init(0xABB, PARAMS.data(), PARAMS.size());
     wm.setHostname(deviceID);
 
-    pinMode(RELAY_CONTACT_GPIO12, OUTPUT);
-    digitalWrite(RELAY_CONTACT_GPIO12, LOW);
-
     bool res = wm.autoConnect(deviceID.c_str()); // Non password protected AP
 
     if (!res)
@@ -291,7 +287,7 @@ void SetCustomMenu(String StatusText)
 void loop()
 {
     wm.process();
-
+   
     if (registrationDelay > 0)
     {
         registrationDelay--;
@@ -361,24 +357,22 @@ void loop()
                 case 0:
                     oBuienradar->SetNightMode(freeAtHomeESPapi.isNightForSysAp());
                     break;
-                case 20:
-                    oBuienradar->Process();
-                    break;
-                case 40:
+                case 30:
                     oWindspeed->Process();
                     break;
                 case 60:
                     oTemperature->Process();
                     break;
-                case 80:
+                case 90:
                     oBrightness->Process();
                     break;
                 default:
+                    oBuienradar->Process();
                     delay(1);
                     break;
                 }
                 handler++;
             }
         }
-    }
+    }    
 }

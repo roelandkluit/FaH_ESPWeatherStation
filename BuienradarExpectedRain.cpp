@@ -117,6 +117,10 @@ void Buienradar::Process()
     {
         if ((millis() - BuienradarRequest->GetSessionStartMillis()) > HTTP_SESSION_TIMEOUT_MS)
         {
+            #ifdef DEBUG
+                Serial.println(String(F("Rain Refresh Timeout")));
+            #endif // DEBUG
+
             BuienradarRequest->ReleaseAsync();
             ScheduleNextUpdate(false);
         }
@@ -136,14 +140,24 @@ void Buienradar::Process()
     }
     else if ((millis() - previousRefreshMillis) >= MillisTimeWaitTime)
     {
+        #ifdef DEBUG
+            Serial.print(String(F("Rain Refresh: ")));
+        #endif // DEBUG
+
         String URI = String(F("/data/raintext/?lat=")) + strLatitude + String(F("&lon=")) + strLongitude;
         if (BuienradarRequest->HTTPRequestAsync("gpsgadget.buienradar.nl", 443, URI))
         {
+            #ifdef DEBUG
+                Serial.println(String(F("requested")));
+            #endif // DEBUG
             //ASync started, reset counter
             ScheduleNextUpdate(false);
         }
         else
         {
+            #ifdef DEBUG
+                Serial.println(String(F("failed")));
+            #endif // DEBUG
             ScheduleNextUpdate(false);
         }
     }
