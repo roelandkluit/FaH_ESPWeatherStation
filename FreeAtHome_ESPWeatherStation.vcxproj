@@ -115,6 +115,10 @@
     <ClInclude Include="WindSpeed.h" />
     <ClInclude Include="__vm\.FreeAtHome_ESPWeatherStation.vsarduino.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="LICENSE" />
+    <None Include="README.md" />
+  </ItemGroup>
   <PropertyGroup>
     <DebuggerFlavor>VisualMicroDebugger</DebuggerFlavor>
   </PropertyGroup>
