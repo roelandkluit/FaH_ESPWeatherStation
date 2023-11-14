@@ -55,6 +55,7 @@ bool BrightnessSensor::ProcessReading(const unsigned int& Value)
     {
         return false;
     }
+    return false;
 }
 
 BrightnessSensor::BrightnessSensor(const uint8_t& pin)

@@ -15,6 +15,7 @@
 #define MODULO_CALC (NUMBER_OF_PROBES / NUMBER_OF_SLOTS)
 #define BIGHTNESS_UPDATE_INTERVAL BIGHTNESS_REFRESH_INTERVAL / MODULO_CALC
 
+
 class BrightnessSensor {
 public:
 	void Process();	
