@@ -181,14 +181,20 @@ void handleDevice()
     String Text = String(F("Heap: ")) + String(ESP.getFreeHeap()) + String(F("\r\nMaxHeap: ")) + String(ESP.getMaxFreeBlockSize()) + String(F("\r\nFragemented:")) + String(ESP.getHeapFragmentation()) + String(F("\r\nFAHESP:")) + freeAtHomeESPapi.Version() + String(F("\r\nConnectCount:")) + String(regCount) + String(F("\r\nConnectFail:")) + String(regCountFail);
 #endif // ESP32
 
-#ifndef MINIMAL_UPLOAD
     if (espWeer != NULL)
     {
         Text += String(F("\r\nWind RPM Count: ")) + String(oWindspeed->currentWindFaneReading);
         Text += String(F("\r\nPD: ")) + String(espWeer->GetPendingDatapointCount());
         Text += String(F("\r\nMSC: ")) + String(espWeer->GetMScounter());
     }
-#endif
+
+    if (oBuienradar != NULL)
+    {
+        Text += String(F("\r\nBS: ")) + String(oBuienradar->GetLastRequestSucceeded());
+        Text += String(F("\r\nWT: ")) + String(oBuienradar->GetWaitTime());
+        Text += String(F("\r\nRS: ")) + String(oBuienradar->GetRefreshSecondsRemaining());
+        Text += String(F("\r\nLBD: ")) + oBuienradar->LastBodyData;
+    }
 
     wm.server->send(200, String(F("text/plain")), Text.c_str());
 }

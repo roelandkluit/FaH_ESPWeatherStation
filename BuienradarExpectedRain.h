@@ -37,20 +37,25 @@ private:
 	float amountOfRain = -1; //Set to invalid value to force update first poll
 	uint8_t maxForcastLinesToCheck = MAX_TIME_SEGEMENTS_TO_USE_FOR_RAIN_FORECAST;
 	bool ParseBuienradarData(const String &regendata);
-	void ScheduleNextUpdate(const bool &lastUpdateSuccesfull);
+	void ScheduleNextUpdate(const bool &lastUpdateSuccesfull);	
 	void ProcessInternal();
 	void SetRainExpected(const bool& isRainOrExpected, const float& amount);
 	//void ProcessBuienradar(void* optParm, AsyncHTTPSRequest* request, int readyState);
 	void CalculateForcastSampleSize();
 	String FixDecimalCount(const String& input);
 	void(*__CB_RAIN_EXPECTED_CHANGED)(const bool &isRainOrExpected, const float &amount) = NULL;
+	bool lastRequestSucceeded = false;
 public:
 	void SetOnRainReportEvent(void(*callback)(const bool& isRainOrExpected, const float& amount)) { __CB_RAIN_EXPECTED_CHANGED = callback; }
 	~Buienradar();
 	Buienradar(const String Latitude, const String Longitude);
 	void SetNightMode(const bool& isNightMode);
 	float GetExpectedAmountOfRain();
+	unsigned long GetWaitTime();
+	long GetRefreshSecondsRemaining();
+	bool GetLastRequestSucceeded();
 	void Process();	
+	String LastBodyData = "";
 };
 
 #endif

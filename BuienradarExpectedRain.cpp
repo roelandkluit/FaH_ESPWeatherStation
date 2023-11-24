@@ -88,6 +88,20 @@ void Buienradar::ScheduleNextUpdate(const bool& lastUpdateSuccesfull)
     */
 }
 
+unsigned long Buienradar::GetWaitTime()
+{
+    return (MillisTimeWaitTime / 1000);
+}
+
+long Buienradar::GetRefreshSecondsRemaining()
+{
+    return ((long(millis() - previousRefreshMillis) + long(MillisTimeWaitTime)) / 1000);
+}
+
+bool Buienradar::GetLastRequestSucceeded()
+{
+    return this->lastRequestSucceeded;
+}
 
 void Buienradar::SetRainExpected(const bool &isRainOrExpected, const float &amount)
 {
@@ -133,10 +147,18 @@ void Buienradar::Process()
     {
         //Serial.println("Completed");
         String BodyData = BuienradarRequest->GetBody();
-        ParseBuienradarData(BodyData);
+        this->LastBodyData = "[" + BodyData + "]";
+        if (ParseBuienradarData(BodyData))
+        {
+            lastRequestSucceeded = true;
+        }
+        else
+        {
+            lastRequestSucceeded = false;
+        }
         //Serial.println(returndata);
         BuienradarRequest->ReleaseAsync();
-        ScheduleNextUpdate(true);
+        ScheduleNextUpdate(lastRequestSucceeded);
     }
     else if ((millis() - previousRefreshMillis) >= MillisTimeWaitTime)
     {
