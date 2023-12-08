@@ -2,8 +2,8 @@
 *
 * Title			    : FreeAtHome_ESPWeatherStation
 * Description:      : Implements the Busch-Jeager / ABB Free@Home API for a ESP32 based Weather Station.
-* Version		    : v 0.2
-* Last updated      : 2023.10.20
+* Version		    : v 0.8
+* Last updated      : 2023.12.08
 * Target		    : Custom build Weather Station
 * Author            : Roeland Kluit
 * Web               : https://github.com/roelandkluit/Fah_ESPWeatherStation
@@ -247,7 +247,11 @@ bool Buienradar::ParseBuienradarData(const String &regendata)
 
         if (val > 0)
         {
-            blRainExpectedOrRaining = true; //If rain is expected for the next X messurements, set it to true
+            if (lineCount < 5) //Use the value for the first upcomming messurement
+                blRainExpectedOrRaining = true; //If rain is expected for the next X messurements, set it to true
+            //else
+            //TODO increase update frequency
+
             if (lineCount == 0) //Use the value for the first upcomming messurement
             {
                 ldCurrentAmountOfRain = pow(10, ((val - 109) / 32));

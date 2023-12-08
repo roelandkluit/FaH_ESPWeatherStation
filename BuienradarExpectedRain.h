@@ -2,8 +2,8 @@
 *
 * Title			    : FreeAtHome_ESPWeatherStation
 * Description:      : Implements the Busch-Jeager / ABB Free@Home API for a ESP32 based Weather Station.
-* Version		    : v 0.2
-* Last updated      : 2023.10.20
+* Version		    : v 0.8
+* Last updated      : 2023.12.08
 * Target		    : Custom build Weather Station
 * Author            : Roeland Kluit
 * Web               : https://github.com/roelandkluit/Fah_ESPWeatherStation
@@ -38,7 +38,7 @@ private:
 	uint8_t maxForcastLinesToCheck = MAX_TIME_SEGEMENTS_TO_USE_FOR_RAIN_FORECAST;
 	bool ParseBuienradarData(const String &regendata);
 	void ScheduleNextUpdate(const bool &lastUpdateSuccesfull);	
-	void ProcessInternal();
+	//void ProcessInternal();
 	void SetRainExpected(const bool& isRainOrExpected, const float& amount);
 	//void ProcessBuienradar(void* optParm, AsyncHTTPSRequest* request, int readyState);
 	void CalculateForcastSampleSize();

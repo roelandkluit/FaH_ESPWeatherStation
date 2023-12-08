@@ -3,7 +3,7 @@
 * Title			    : FreeAtHome_ESPWeatherStation
 * Description:      : Implements the Busch-Jeager / ABB Free@Home API for a ESP32 based Weather Station.
 * Version		    : v 0.2
-* Last updated      : 2023.10.20
+* Last updated      : 2023.12.08
 * Target		    : Custom build Weather Station
 * Author            : Roeland Kluit
 * Web               : https://github.com/roelandkluit/Fah_ESPWeatherStation
@@ -20,7 +20,14 @@ Generic ESP32_WROVER Module
 * *********************** *********************** *********************** *********************** **********************
 */
 
-#include <BuildConfig.h>
+#include <FahESPBuildConfig.h>
+//#define DEBUG
+
+#ifdef DEBUG
+    #define DEBUG_PL Serial.println
+    #define DEBUG_P Serial.print
+    #define DEBUG_F Serial.printf
+#endif
 
 #ifdef ESP32
 #include <dummy.h>
@@ -30,7 +37,6 @@ Generic ESP32_WROVER Module
 #error "Platform not supported"
 #endif
 
-#include <BuildConfig.h>
 #include <FreeAtHomeESPapi.h>
 #include <FahESPDevice.h>
 #include <FahESPWeatherStation.h>
@@ -63,7 +69,7 @@ uint8_t handler = 0;
 
 constexpr size_t CUSTOM_FIELD_LEN = 40;
 constexpr size_t LONLAT_FIELD_LEN = 10;
-constexpr std::array<ParamEntry, 5> PARAMS = { {
+constexpr std::array<ParamEntry, 6> PARAMS = { {
     {
       "Ap",
       "SysAp",
@@ -93,6 +99,12 @@ constexpr std::array<ParamEntry, 5> PARAMS = { {
       "Latitude",
       LONLAT_FIELD_LEN,
       ""
+    },
+    {
+      "dn",
+      "Name",
+      CUSTOM_FIELD_LEN,
+      ""
     }
 } };
 
@@ -100,7 +112,7 @@ void RegenCallback(const bool& isRainOrExpected, const float& amount)
 {
     if (espWeer != NULL)
     {
-        espWeer->SetRainInformation(amount);
+        espWeer->SetRainInformation(amount, isRainOrExpected);
         SetCustomMenu(String(F("Rain Update")));
         //Serial.print("Rain: "); Serial.print(isRainOrExpected); Serial.print(" Amount: "); Serial.println(amount);
     }
@@ -213,7 +225,7 @@ void setup()
     deviceID = String(F("ESPWeatherStation_")) + String(WIFI_getChipId(), HEX);
     WiFi.mode(WIFI_AP_STA); // explicitly set mode, esp defaults to STA+AP
     wm.setDebugOutput(false);
-    wm_helper.Init(0xABB, PARAMS.data(), PARAMS.size());
+    wm_helper.Init(0xABBF, PARAMS.data(), PARAMS.size());
     wm.setHostname(deviceID);
 
     bool res = wm.autoConnect(deviceID.c_str()); // Non password protected AP
@@ -290,6 +302,17 @@ void SetCustomMenu(String StatusText)
     wm.setCustomMenuHTML(menuHtml.c_str());
 }
 
+void FahCallBack(FAHESPAPI_EVENT Event, uint64_t FAHID, const char* ptrChannel, const char* ptrDataPoint, void* ptrValue)
+{
+    if (Event == FAHESPAPI_EVENT::FAHESPAPI_ON_DISPLAYNAME)
+    {
+        DEBUG_P(F("PARM_DISPLAYNAME "));
+        const char* val = ((char*)ptrValue);
+        DEBUG_PL(val);
+        wm_helper.setSetting(5, val, strlen(val));
+    }
+}
+
 void loop()
 {
     wm.process();
@@ -339,14 +362,20 @@ void loop()
 
                 DEBUG_PL(F("Create WeatherStation Device"));
                 String deviceName = String(F("ESP32 Weer ")) + String(WIFI_getChipId(), HEX);
+                const char* val = wm_helper.GetSetting(5);
+                if (strlen(val) > 0)
+                {
+                    deviceName = String(val);
+                }
                 #ifdef DEBUG
-                espWeer = freeAtHomeESPapi.CreateWeatherStation("TestWeer", deviceName.c_str(), 300);                
+                    espWeer = freeAtHomeESPapi.CreateWeatherStation("TestWeer", deviceName.c_str(), 300);                
                 #else
                     espWeer = freeAtHomeESPapi.CreateWeatherStation("WeatherStation", deviceName.c_str(), 300);
                 #endif          
                 if (espWeer != NULL)
                 {                    
                     String FahID = freeAtHomeESPapi.U64toString(espWeer->GetFahDeviceID());
+                    espWeer->AddCallback(FahCallBack);
                     SetCustomMenu(String(F("Device Registered: ")) + FahID);
                 }
                 else

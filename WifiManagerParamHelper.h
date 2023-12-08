@@ -1,12 +1,12 @@
 /*************************************************************************************************************
 *
-* Title			    : FreeAtHome_ESPWeatherStation
-* Description:      : Implements the Busch-Jeager / ABB Free@Home API for a ESP32 based Weather Station.
-* Version		    : v 0.2
-* Last updated      : 2023.10.20
-* Target		    : Custom build Weather Station
+* Title			    : FreeAtHome_AthomPG01V2
+* Description:      : Implements the Busch-Jeager / ABB Free@Home API for Athom PG01 Version 2 Socket.
+* Version		    : v 0.8
+* Last updated      : 2023.12.06
+* Target		    : Athom Smart Plug PG01 v2
 * Author            : Roeland Kluit
-* Web               : https://github.com/roelandkluit/Fah_ESPWeatherStation
+* Web               : https://github.com/roelandkluit/Fah_AthomPG01V2
 * License           : GPL-3.0 license
 *
 **************************************************************************************************************/
@@ -86,6 +86,16 @@ public:
         }
         return nullptr;
     }
+
+    void setSetting(size_t idx, const char* value, const int &length)
+    {
+        if (idx < parameters_.size())
+        {
+            parameters_[idx].setValue(value, length);
+            OnParamCallback();
+        }
+    }
+
 
 private:
     static constexpr size_t HEADER_SIZE = sizeof(uint16_t) * 2;
