@@ -2,8 +2,8 @@
 *
 * Title			    : FreeAtHome_ESPWeatherStation
 * Description:      : Implements the Busch-Jeager / ABB Free@Home API for a ESP32 based Weather Station.
-* Version		    : v 0.8
-* Last updated      : 2023.12.08
+* Version		    : v 0.9
+* Last updated      : 2023.12.11
 * Target		    : Custom build Weather Station
 * Author            : Roeland Kluit
 * Web               : https://github.com/roelandkluit/Fah_ESPWeatherStation

@@ -3,7 +3,7 @@
 * Title			    : FreeAtHome_ESPWeatherStation
 * Description:      : Implements the Busch-Jeager / ABB Free@Home API for a ESP32 based Weather Station.
 * Version		    : v 0.2
-* Last updated      : 2023.12.08
+* Last updated      : 2023.12.11
 * Target		    : Custom build Weather Station
 * Author            : Roeland Kluit
 * Web               : https://github.com/roelandkluit/Fah_ESPWeatherStation
@@ -293,7 +293,8 @@ void SetCustomMenu(String StatusText)
         State = GetWeerStatus();
     }
 
-    menuHtml = String(F("{1}<br/>{2}<br/><meta http-equiv='refresh' content='10'>\n"));
+    menuHtml = String(F("Name:{n}<br/>{1}<br/>{2}<br/><meta http-equiv='refresh' content='10'>\n"));
+    menuHtml.replace(T_n, wm_helper.GetSetting(5));
     menuHtml.replace(T_1, State);
     menuHtml.replace(T_2, StatusText);
 
