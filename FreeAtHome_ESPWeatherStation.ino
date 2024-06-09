@@ -108,6 +108,36 @@ constexpr std::array<ParamEntry, 6> PARAMS = { {
     }
 } };
 
+String GetWeerStatus()
+{
+    String WeerInfo = String(F("Temp: {0}<br>Light: {1}<br>WindMS: {2}<br>WindBau: {3}<br>Rain: {4}"));
+    WeerInfo.replace("{0}", String(oTemperature->GetTemperature()));
+    WeerInfo.replace("{1}", String(oBrightness->GetBrightness()));
+    WeerInfo.replace("{2}", String(oWindspeed->GetWindGusts()));
+    WeerInfo.replace("{3}", String(oWindspeed->GetSpeedBeaufort()));
+    WeerInfo.replace("{4}", String(oBuienradar->GetExpectedAmountOfRain()));
+    return WeerInfo;
+}
+
+void SetCustomMenu(String StatusText)
+{
+    String State = "";
+
+    if (espWeer != NULL)
+    {
+        State = GetWeerStatus();
+    }
+
+    menuHtml = String(F("Name:{n}<br/>{1}<br/>{2}<br/><meta http-equiv='refresh' content='10'>\n"));
+    menuHtml.replace(T_n, wm_helper.GetSetting(5));
+    menuHtml.replace(T_1, State);
+    menuHtml.replace(T_2, StatusText);
+
+    DEBUG_PL(StatusText);
+
+    wm.setCustomMenuHTML(menuHtml.c_str());
+}
+
 void RegenCallback(const bool& isRainOrExpected, const float& amount)
 {
     if (espWeer != NULL)
@@ -271,36 +301,6 @@ void setup()
     oBuienradar->SetOnRainReportEvent(RegenCallback);
 
     wm.server->on("/rest", SendLegacyRest);
-}
-
-String GetWeerStatus()
-{
-    String WeerInfo = String(F("Temp: {0}<br>Light: {1}<br>WindMS: {2}<br>WindBau: {3}<br>Rain: {4}"));
-    WeerInfo.replace("{0}", String(oTemperature->GetTemperature()));
-    WeerInfo.replace("{1}", String(oBrightness->GetBrightness()));
-    WeerInfo.replace("{2}", String(oWindspeed->GetWindGusts()));
-    WeerInfo.replace("{3}", String(oWindspeed->GetSpeedBeaufort()));
-    WeerInfo.replace("{4}", String(oBuienradar->GetExpectedAmountOfRain()));
-    return WeerInfo;
-}
-
-void SetCustomMenu(String StatusText)
-{
-    String State = "";
-
-    if (espWeer != NULL)
-    {
-        State = GetWeerStatus();
-    }
-
-    menuHtml = String(F("Name:{n}<br/>{1}<br/>{2}<br/><meta http-equiv='refresh' content='10'>\n"));
-    menuHtml.replace(T_n, wm_helper.GetSetting(5));
-    menuHtml.replace(T_1, State);
-    menuHtml.replace(T_2, StatusText);
-
-    DEBUG_PL(StatusText);
-
-    wm.setCustomMenuHTML(menuHtml.c_str());
 }
 
 void FahCallBack(FAHESPAPI_EVENT Event, uint64_t FAHID, const char* ptrChannel, const char* ptrDataPoint, void* ptrValue)

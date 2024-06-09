@@ -777,9 +777,9 @@ class WiFiManager
     // @todo use DEBUG_ESP_x?
     
     // Set default debug level
-    #ifndef WM_DEBUG_LEVEL
-    #define WM_DEBUG_LEVEL DEBUG_NOTIFY
-    #endif
+    //#ifndef WM_DEBUG_LEVEL
+    //#define WM_DEBUG_LEVEL DEBUG_NOTIFY
+    //#endif
 
     // override debug level OFF
     #ifdef WM_NODEBUG

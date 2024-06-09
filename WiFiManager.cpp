@@ -2048,6 +2048,7 @@ void WiFiManager::handleInfo() {
       F("wifihead"),
       F("conx"),
       F("stassid"),
+      F("stasig"),
       F("staip"),
       F("stagw"),
       F("stasub"),
@@ -2243,6 +2244,11 @@ String WiFiManager::getInfoData(String id){
     p = FPSTR(HTTP_INFO_stassid);
     p.replace(FPSTR(T_1),htmlEntities((String)WiFi_SSID()));
   }
+  else if (id == F("stasig")) {
+  p = FPSTR(HTTP_INFO_stasig);
+  p.replace(FPSTR(T_1), String(WiFi.RSSI()));
+  }
+
   else if(id==F("staip")){
     p = FPSTR(HTTP_INFO_staip);
     p.replace(FPSTR(T_1),WiFi.localIP().toString());
@@ -3806,12 +3812,17 @@ String WiFiManager::WiFi_psk(bool persistent) const {
     // DEBUG_WM(DEBUG_VERBOSE,"[EVENT]",event);
     #endif
     if(event == ARDUINO_EVENT_WIFI_STA_DISCONNECTED){
-    #ifdef WM_DEBUG_LEVEL
-      DEBUG_WM(DEBUG_VERBOSE,F("[EVENT] WIFI_REASON: "),info.wifi_sta_disconnected.reason);
+      #ifdef WM_DEBUG_LEVEL
+        DEBUG_WM(DEBUG_VERBOSE,F("[EVENT] WIFI_REASON: "),info.wifi_sta_disconnected.reason);
       #endif
-      if(info.wifi_sta_disconnected.reason == WIFI_REASON_AUTH_EXPIRE || info.wifi_sta_disconnected.reason == WIFI_REASON_AUTH_FAIL){
+      if(info.wifi_sta_disconnected.reason == WIFI_REASON_AUTH_EXPIRE || info.wifi_sta_disconnected.reason == WIFI_REASON_AUTH_FAIL)
+      {
         _lastconxresulttmp = 7; // hack in wrong password internally, sdk emit WIFI_REASON_AUTH_EXPIRE on some routers on auth_fail
-      } else _lastconxresulttmp = WiFi.status();
+      }
+      else
+      {
+          _lastconxresulttmp = WiFi.status();
+      }
       #ifdef WM_DEBUG_LEVEL
       if(info.wifi_sta_disconnected.reason == WIFI_REASON_NO_AP_FOUND) DEBUG_WM(DEBUG_VERBOSE,F("[EVENT] WIFI_REASON: NO_AP_FOUND"));
       if(info.wifi_sta_disconnected.reason == WIFI_REASON_ASSOC_FAIL){
