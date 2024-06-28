@@ -55,3 +55,4 @@ dkms.conf
 /.vs/ProjectSettings.json
 /.vs
 /FreeAtHome_AthomPG01V2.vcxproj.filters
+/obj
