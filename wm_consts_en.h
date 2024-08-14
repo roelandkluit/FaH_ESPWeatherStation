@@ -17,11 +17,11 @@
 // -----------------------------------------------------------------------------------------------
 // TOKENS
 
-const char WM_VERSION_STR[] PROGMEM = "v2.0.15-rc.1";
-const char FAH_VERSION_STR[] PROGMEM = "v0.0.9 - Roeland Kluit";
+const char WM_VERSION_STR[] = "v2.0.15-rc.1";
+const char FAH_VERSION_STR[] = "v0.0.9 - Roeland Kluit";
 
 const uint8_t _nummenutokens = 11;
-const char * const _menutokens[_nummenutokens] PROGMEM = {
+const char * const _menutokens[_nummenutokens] = {
     "wifi",
     "wifinoscan",
     "info",
@@ -35,60 +35,60 @@ const char * const _menutokens[_nummenutokens] PROGMEM = {
     "custom"
 };
 
-const char R_root[]               PROGMEM = "/";
-const char R_wifi[]               PROGMEM = "/wifi";
-const char R_wifinoscan[]         PROGMEM = "/0wifi";
-const char R_wifisave[]           PROGMEM = "/wifisave";
-const char R_info[]               PROGMEM = "/info";
-const char R_param[]              PROGMEM = "/param";
-const char R_paramsave[]          PROGMEM = "/paramsave";
-const char R_restart[]            PROGMEM = "/restart";
-const char R_exit[]               PROGMEM = "/exit";
-const char R_close[]              PROGMEM = "/close";
-const char R_erase[]              PROGMEM = "/erase";
-//const char R_status[]             PROGMEM = "/status";
-const char R_update[]             PROGMEM = "/update";
-const char R_updatedone[]         PROGMEM = "/u";
+const char R_root[]               = "/";
+const char R_wifi[]               = "/wifi";
+const char R_wifinoscan[]         = "/0wifi";
+const char R_wifisave[]           = "/wifisave";
+const char R_info[]               = "/info";
+const char R_param[]              = "/param";
+const char R_paramsave[]          = "/paramsave";
+const char R_restart[]            = "/restart";
+const char R_exit[]               = "/exit";
+const char R_close[]              = "/close";
+const char R_erase[]              = "/erase";
+//const char R_status[]             = "/status";
+const char R_update[]             = "/update";
+const char R_updatedone[]         = "/u";
 
 
 //Strings
-const char S_ip[]                 PROGMEM = "ip";
-const char S_gw[]                 PROGMEM = "gw";
-const char S_sn[]                 PROGMEM = "sn";
-const char S_dns[]                PROGMEM = "dns";
+const char S_ip[]                 = "ip";
+const char S_gw[]                 = "gw";
+const char S_sn[]                 = "sn";
+const char S_dns[]                = "dns";
 
 
 
 //Tokens
 //@todo consolidate and reduce
-const char T_ss[]                 PROGMEM = "{"; // token start sentinel
-const char T_es[]                 PROGMEM = "}"; // token end sentinel
-const char T_1[]                  PROGMEM = "{1}"; // @token 1
-const char T_2[]                  PROGMEM = "{2}"; // @token 2
-const char T_3[]                  PROGMEM = "{3}"; // @token 2
-const char T_v[]                  PROGMEM = "{v}"; // @token v
-const char T_V[]                  PROGMEM = "{V}"; // @token v
-const char T_I[]                  PROGMEM = "{I}"; // @token I
-const char T_i[]                  PROGMEM = "{i}"; // @token i
-const char T_n[]                  PROGMEM = "{n}"; // @token n
-const char T_p[]                  PROGMEM = "{p}"; // @token p
-const char T_t[]                  PROGMEM = "{t}"; // @token t
-const char T_l[]                  PROGMEM = "{l}"; // @token l
-const char T_c[]                  PROGMEM = "{c}"; // @token c
-const char T_e[]                  PROGMEM = "{e}"; // @token e
-const char T_q[]                  PROGMEM = "{q}"; // @token q
-const char T_r[]                  PROGMEM = "{r}"; // @token r
-const char T_R[]                  PROGMEM = "{R}"; // @token R
-const char T_h[]                  PROGMEM = "{h}"; // @token h
+const char T_ss[]                 = "{"; // token start sentinel
+const char T_es[]                 = "}"; // token end sentinel
+const char T_1[]                  = "{1}"; // @token 1
+const char T_2[]                  = "{2}"; // @token 2
+const char T_3[]                  = "{3}"; // @token 2
+const char T_v[]                  = "{v}"; // @token v
+const char T_V[]                  = "{V}"; // @token v
+const char T_I[]                  = "{I}"; // @token I
+const char T_i[]                  = "{i}"; // @token i
+const char T_n[]                  = "{n}"; // @token n
+const char T_p[]                  = "{p}"; // @token p
+const char T_t[]                  = "{t}"; // @token t
+const char T_l[]                  = "{l}"; // @token l
+const char T_c[]                  = "{c}"; // @token c
+const char T_e[]                  = "{e}"; // @token e
+const char T_q[]                  = "{q}"; // @token q
+const char T_r[]                  = "{r}"; // @token r
+const char T_R[]                  = "{R}"; // @token R
+const char T_h[]                  = "{h}"; // @token h
 
 // http
-const char HTTP_HEAD_CL[]         PROGMEM = "Content-Length";
-const char HTTP_HEAD_CT[]         PROGMEM = "text/html";
-const char HTTP_HEAD_CT2[]        PROGMEM = "text/plain";
-const char HTTP_HEAD_CORS[]       PROGMEM = "Access-Control-Allow-Origin";
-const char HTTP_HEAD_CORS_ALLOW_ALL[]  PROGMEM = "*";
+const char HTTP_HEAD_CL[]         = "Content-Length";
+const char HTTP_HEAD_CT[]         = "text/html";
+const char HTTP_HEAD_CT2[]        = "text/plain";
+const char HTTP_HEAD_CORS[]       = "Access-Control-Allow-Origin";
+const char HTTP_HEAD_CORS_ALLOW_ALL[]  = "*";
 
-const char * const WIFI_STA_STATUS[] PROGMEM
+const char * const WIFI_STA_STATUS[]
 {
   "WL_IDLE_STATUS",     // 0 STATION_IDLE
   "WL_NO_SSID_AVAIL",   // 1 STATION_NO_AP_FOUND
@@ -101,7 +101,7 @@ const char * const WIFI_STA_STATUS[] PROGMEM
 };
 
 #ifdef ESP32
-const char * const AUTH_MODE_NAMES[] PROGMEM
+const char * const AUTH_MODE_NAMES[]
 {
     "OPEN",
     "WEP",
@@ -112,7 +112,7 @@ const char * const AUTH_MODE_NAMES[] PROGMEM
     "MAX"
 };
 #elif defined(ESP8266)
-const char * const AUTH_MODE_NAMES[] PROGMEM
+const char * const AUTH_MODE_NAMES[]
 {
     "",
     "",
@@ -126,7 +126,7 @@ const char * const AUTH_MODE_NAMES[] PROGMEM
 };
 #endif
 
-const char* const WIFI_MODES[] PROGMEM = { "NULL", "STA", "AP", "STA+AP" };
+const char* const WIFI_MODES[] = { "NULL", "STA", "AP", "STA+AP" };
 
 
 #ifdef ESP32
