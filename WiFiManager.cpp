@@ -1558,6 +1558,13 @@ String WiFiManager::WiFiManager::getScanItemOut(){
 
     if(!_numNetworks) WiFi_scanNetworks(); // scan in case this gets called before any scans
 
+    String CurrentWifiBSSID;
+    if (WiFi.isConnected())
+    {
+        CurrentWifiBSSID = WiFi.BSSIDstr();
+        Serial.println(CurrentWifiBSSID);
+    }
+
     int n = _numNetworks;
     if (n == 0) {
       #ifdef WM_DEBUG_LEVEL
@@ -1592,6 +1599,7 @@ String WiFiManager::WiFiManager::getScanItemOut(){
         });
        */
 
+      /*
       // remove duplicates ( must be RSSI sorted )
       if (_removeDuplicateAPs) {
         String cssid;
@@ -1607,7 +1615,7 @@ String WiFiManager::WiFiManager::getScanItemOut(){
             }
           }
         }
-      }
+      }*/
 
       // token precheck, to speed up replacements on large ap lists
       String HTTP_ITEM_STR = FPSTR(HTTP_ITEM);
@@ -1632,9 +1640,15 @@ String WiFiManager::WiFiManager::getScanItemOut(){
         #ifdef WM_DEBUG_LEVEL
         DEBUG_WM(DEBUG_VERBOSE,F("AP: "),(String)WiFi.RSSI(indices[i]) + " " + (String)WiFi.SSID(indices[i]));
         #endif
-
+        String Bstrid = WiFi.BSSIDstr(indices[i]);
+        bool curconnect = (Bstrid == CurrentWifiBSSID);
         int rssiperc = getRSSIasQuality(WiFi.RSSI(indices[i]));
         uint8_t enc_type = WiFi.encryptionType(indices[i]);
+
+        String isCon = "";
+        if (curconnect) {
+            isCon = " [*]";
+        }
 
         if (_minimumQuality == -1 || _minimumQuality < rssiperc) {
           String item = HTTP_ITEM_STR;
@@ -1643,7 +1657,7 @@ String WiFiManager::WiFiManager::getScanItemOut(){
             continue; // No idea why I am seeing these, lets just skip them for now
           }
           item.replace(FPSTR(T_V), htmlEntities(WiFi.SSID(indices[i]))); // ssid no encoding
-          item.replace(FPSTR(T_v), htmlEntities(WiFi.SSID(indices[i]),true)); // ssid no encoding
+          item.replace(FPSTR(T_v), htmlEntities(WiFi.SSID(indices[i])+ isCon,true)); // ssid no encoding
           if(tok_e) item.replace(FPSTR(T_e), encryptionTypeStr(enc_type));
           if(tok_r) item.replace(FPSTR(T_r), (String)rssiperc); // rssi percentage 0-100
           if(tok_R) item.replace(FPSTR(T_R), (String)WiFi.RSSI(indices[i])); // rssi db

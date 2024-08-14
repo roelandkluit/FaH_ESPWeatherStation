@@ -66,25 +66,25 @@ void WindSpeed::shiftWindspeedArray(const unsigned int &newValue)
     //Serial.print(newValue); Serial.print("-->");
 
     unsigned long totalspeed = 0;
-    unsigned long windSpeedAvgLast3 = 0;
-    unsigned int lMaxWindSpeedRPM = newValue / 2;
-
+    unsigned long LastWindSpeedAverage = 0;
+    
+    unsigned int lLastRecorderWindSpeedRPM = newValue / 2;
     if (newValue > 0)
     {
-        if (newValue < MaxWindSpeedRPM)
+        if (newValue < LastRecorderWindSpeedRPM)
         {
-            lMaxWindSpeedRPM = (MaxWindSpeedRPM + newValue) / 2;
+            lLastRecorderWindSpeedRPM = (LastRecorderWindSpeedRPM + newValue) / 2;
         }
         else
         {
-            lMaxWindSpeedRPM = newValue;
+            lLastRecorderWindSpeedRPM = newValue;
         }
         LastTimeSet = WINDSPEED_REMBER_TIME;
-        MaxWindSpeedRPM = lMaxWindSpeedRPM;
+        LastRecorderWindSpeedRPM = lLastRecorderWindSpeedRPM;
     }
     else
     {
-        lMaxWindSpeedRPM = MaxWindSpeedRPM;
+        lLastRecorderWindSpeedRPM = LastRecorderWindSpeedRPM;
     }
 
     /*for (int i = 0; i < WINDSPEED_ARRAY_SIZE; i++)
@@ -95,38 +95,57 @@ void WindSpeed::shiftWindspeedArray(const unsigned int &newValue)
     Serial.println();*/
 
     memcpy(windspeed_array, &windspeed_array[1], (WINDSPEED_ARRAY_SIZE - 1) * sizeof(unsigned int));
-    windspeed_array[WINDSPEED_ARRAY_SIZE - 1] = lMaxWindSpeedRPM;
+    windspeed_array[WINDSPEED_ARRAY_SIZE - 1] = lLastRecorderWindSpeedRPM;    
 
     for (int i = 0; i < WINDSPEED_ARRAY_SIZE; i++)
     {
-        totalspeed += windspeed_array[i];
+        totalspeed += (unsigned long)windspeed_array[i];
         //Serial.print(windspeed_array[i], HEX);
         //Serial.print(',');
     }
 
-    for (int i = WINDSPEED_ARRAY_SIZE - 3; i < WINDSPEED_ARRAY_SIZE; i++)
+    for (int i = WINDSPEED_ARRAY_SIZE - WINDSPEED_MAX_SAMPLE_COUNT; i < WINDSPEED_ARRAY_SIZE; i++)
     {
-        windSpeedAvgLast3 += windspeed_array[i];
+        LastWindSpeedAverage += (unsigned long)windspeed_array[i];
         //Serial.print(windspeed_array[i], HEX);
         //Serial.print(',');
     }
 
     //Serial.println();
 
-    MaxWindSpeedAvgRPM = (windSpeedAvgLast3 / 3);
-    AverageWindspeedRPM = (totalspeed / WINDSPEED_ARRAY_SIZE);
+    MaxWindSpeedAvgRPM = (LastWindSpeedAverage / WINDSPEED_MAX_SAMPLE_COUNT);
+    AverageWindspeedRPM = (unsigned int)(totalspeed / (unsigned long)WINDSPEED_ARRAY_SIZE);
 
     //Serial.print("Avg:");Serial.print(AverageWindspeedRPM); Serial.print(", Tot:"); Serial.print(totalspeed);    
     //Serial.print("**** Average:"); Serial.print(WindSpeedToMsFromRPM(AverageWindspeedRPM)); Serial.print(", BFT:"); Serial.println(Beaufort(WindSpeedToMsFromRPM(AverageWindspeedRPM)));
 
     if (LastTimeSet == 0)
     {
-        MaxWindSpeedRPM = 0;
+        LastRecorderWindSpeedRPM = 0;
     }
     else
     {
         LastTimeSet--;
     }
+}
+
+String WindSpeed::GetValues()
+{
+    String Values = "";
+    for (int i = 0; i < WINDSPEED_ARRAY_SIZE; i++)
+    {
+        Values += "V:" + String(i) + "->" + String(windspeed_array[i]) + "\r\n";
+    }
+    float flMaxWindGustMS = WindSpeedToMsFromRPM(MaxWindSpeedAvgRPM);
+    unsigned int ulSpeedBeaufort = Beaufort(WindSpeedToMsFromRPM(AverageWindspeedRPM));
+
+    Values += "MaxRPM:" + String(MaxWindSpeedAvgRPM) + "\r\n";
+    Values += "avgRPM:" + String(AverageWindspeedRPM) + "\r\n";
+
+    Values += "MaxWindGustMS:" + String(flMaxWindGustMS) + "\r\n";
+    Values += "SpeedBeaufort:" + String(ulSpeedBeaufort) + "\r\n";
+
+    return Values;
 }
 
 void WindSpeed::SetWindspeeds(const float& maxWindGustMS, const uint8_t& windSpeedBeaufort)
@@ -165,7 +184,7 @@ void WindSpeed::Process()
 
         if (NoNotifyCounter == 0)
         {
-            float flMaxWindGustMS = WindSpeedToMsFromRPM(MaxWindSpeedRPM);
+            float flMaxWindGustMS = WindSpeedToMsFromRPM(MaxWindSpeedAvgRPM);
             unsigned int ulSpeedBeaufort = Beaufort(WindSpeedToMsFromRPM(AverageWindspeedRPM));
             SetWindspeeds(flMaxWindGustMS, ulSpeedBeaufort);
             NoNotifyCounter = WINDSPEED_SKIP_NOTIFICATIONS;

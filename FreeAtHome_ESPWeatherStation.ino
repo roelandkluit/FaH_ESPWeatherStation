@@ -67,6 +67,7 @@ uint16_t regCount = 0;
 uint16_t regCountFail = 0;
 uint8_t handler = 0;
 
+//unsigned long lastUpdateTimer = 0;
 constexpr size_t CUSTOM_FIELD_LEN = 40;
 constexpr size_t LONLAT_FIELD_LEN = 10;
 constexpr std::array<ParamEntry, 6> PARAMS = { {
@@ -118,6 +119,17 @@ String GetWeerStatus()
     WeerInfo.replace("{4}", String(oBuienradar->GetExpectedAmountOfRain()));
     return WeerInfo;
 }
+
+/*
+void UpdateBuienradar()
+{
+    if ((millis() - lastUpdateTimer) > (1000 * 60 * 10))
+    {
+        Serial.println("UpdateBR");
+        lastUpdateTimer = millis();
+    }
+}
+*/
 
 void SetCustomMenu(String StatusText)
 {
@@ -188,6 +200,18 @@ void TemperatureCallback(const float& amount)
     }
 }
 
+void SendWindDebug()
+{
+    if (oWindspeed == NULL)
+    {
+        wm.server->send(503, String(F("text/plain")), String(F("Not Ready")));
+    }
+    else
+    {
+        wm.server->send(200, String("text/plain"), oWindspeed->GetValues());
+    }
+}
+
 void SendLegacyRest()
 {
     if (oWindspeed == NULL || oTemperature == NULL || oBrightness == NULL)
@@ -202,8 +226,8 @@ void SendLegacyRest()
         unsigned long long uptime = esp_timer_get_time() / 1000 / 1000;
         unsigned long SunLightLevel = oBrightness->GetBrightness();
         float temperatureCoutside = oTemperature->GetTemperature();
-        snprintf(temp, 200, String(F("{\"weather\":{\"windmax\":\"%2.1f\",\"windavg\":\"%u\",\"sun\":\"%u\",\"temperature\":\"%4.1f\",\"uptm\":\"%llu\"}}")).c_str(), wsms, awsms, SunLightLevel, temperatureCoutside, uptime);
-        wm.server->send(200, String(F("application/json")), temp);
+        snprintf(temp, 200, String("{\"weather\":{\"windmax\":\"%2.1f\",\"windavg\":\"%u\",\"sun\":\"%u\",\"temperature\":\"%4.1f\",\"uptm\":\"%llu\"}}").c_str(), wsms, awsms, SunLightLevel, temperatureCoutside, uptime);
+        wm.server->send(200, String("application/json"), temp);
     }
 }
 
@@ -218,7 +242,7 @@ void handleDevice()
     #endif // ESP32
     */
 #ifdef ESP32
-    String Text = "Heap: " + String(ESP.getFreeHeap()) + "\r\nMaxHeap: " + String(ESP.getMaxAllocHeap()) + String(F("\r\nFAHESP:")) + freeAtHomeESPapi.Version() + String(F("\r\nConnectCount:")) + String(regCount) + String(F("\r\nConnectFail:")) + String(regCountFail);
+    String Text = "Heap: " + String(ESP.getFreeHeap()) + "\r\nMaxHeap: " + String(ESP.getMaxAllocHeap()) + String("\r\nFAHESP:") + freeAtHomeESPapi.Version() + String("\r\nConnectCount:") + String(regCount) + String("\r\nConnectFail:") + String(regCountFail);
 #else //ESP8266
     String Text = String(F("Heap: ")) + String(ESP.getFreeHeap()) + String(F("\r\nMaxHeap: ")) + String(ESP.getMaxFreeBlockSize()) + String(F("\r\nFragemented:")) + String(ESP.getHeapFragmentation()) + String(F("\r\nFAHESP:")) + freeAtHomeESPapi.Version() + String(F("\r\nConnectCount:")) + String(regCount) + String(F("\r\nConnectFail:")) + String(regCountFail);
 #endif // ESP32
@@ -252,7 +276,7 @@ void setup()
     delay(500);
     DEBUG_PL("Starting in debug mode");
 
-    deviceID = String(F("ESPWeatherStation_")) + String(WIFI_getChipId(), HEX);
+    deviceID = String("ESPWeatherStation_") + String(WIFI_getChipId(), HEX);
     WiFi.mode(WIFI_AP_STA); // explicitly set mode, esp defaults to STA+AP
     wm.setDebugOutput(false);
     wm_helper.Init(0xABBF, PARAMS.data(), PARAMS.size());
@@ -262,7 +286,7 @@ void setup()
 
     if (!res)
     {
-        DEBUG_PL(String(F("Failed to connect")));
+        DEBUG_PL(String("Failed to connect"));
         ESP.restart();
     }
     else 
@@ -300,6 +324,7 @@ void setup()
     oBuienradar = new Buienradar(lon, lat);
     oBuienradar->SetOnRainReportEvent(RegenCallback);
 
+    wm.server->on("/wind", SendWindDebug);
     wm.server->on("/rest", SendLegacyRest);
 }
 
