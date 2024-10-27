@@ -60,6 +60,9 @@ BrightnessSensor* oBrightness;
 String deviceID;
 String menuHtml;
 
+unsigned long previousMillis = 0;
+unsigned long interval = 30000;
+
 WiFiManager wm;
 WifiManagerParamHelper wm_helper(wm);
 uint16_t registrationDelay = 5000;
@@ -342,6 +345,16 @@ void FahCallBack(FAHESPAPI_EVENT Event, uint64_t FAHID, const char* ptrChannel, 
 void loop()
 {
     wm.process();
+
+    unsigned long currentMillis = millis();
+    // if WiFi is down, try reconnecting every CHECK_WIFI_TIME seconds
+    if ((WiFi.status() != WL_CONNECTED) && (currentMillis - previousMillis >= interval)) {
+        Serial.print(millis());
+        Serial.println("Reconnecting to WiFi...");
+        WiFi.disconnect();
+        WiFi.reconnect();
+        previousMillis = currentMillis;
+    }
    
     if (registrationDelay > 0)
     {
